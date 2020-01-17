@@ -30,6 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int startTime;
   double speed = 0;
   bool isRunning = false;
+  DateTime lastTime;
 
   String _text = '';
 
@@ -51,8 +52,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // var curTime = DateTime.now().millisecondsSinceEpoch;
 
+      var _curTime = DateTime.now();
+      var deltaTime = _curTime.difference(lastTime);
       var elapsedSinceStarted = DateTime.now().toIso8601String();
-      speed += event.x;
+      speed += (event.x / deltaTime.inMilliseconds);
 
       print("$elapsedSinceStarted\t${event.x}\t${event.y}\t${event.z}");
 
