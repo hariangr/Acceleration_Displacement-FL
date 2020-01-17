@@ -26,11 +26,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  int startTime;
+  DateTime startTime;
   double speed = 0;
   bool isRunning = false;
   DateTime lastTime;
+  double displacement = 0;
+
+  bool first = true;
 
   String _text = '';
 
@@ -39,28 +41,44 @@ class _MyHomePageState extends State<MyHomePage> {
       // If running, stop
       isRunning = false;
       startTime = null;
+      first = true;
     } else {
       // If not running, start
+      speed = 0;
+      displacement = 0;
       isRunning = true;
-      startTime = DateTime.now().millisecondsSinceEpoch;
     }
 
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      if (first) {
+        first = false;
+        startTime = DateTime.now();
+      }
       if (!isRunning) {
         return;
       }
 
       // var curTime = DateTime.now().millisecondsSinceEpoch;
 
-      var _curTime = DateTime.now();
-      var deltaTime = _curTime.difference(lastTime);
-      var elapsedSinceStarted = DateTime.now().toIso8601String();
-      speed += (event.x / deltaTime.inMilliseconds);
+      DateTime _curTime = DateTime.now();
+      // var deltaTime = _curTime.difference(lastTime);
+      var elapsedSinceStarted =
+          "${_curTime.hour}:${_curTime.minute}:${_curTime.second}:${_curTime.millisecond}";
+      var elapsedMilis = _curTime.difference(startTime).inMilliseconds;
+      // var elapsedSinceStarted = _curTime.difference(startTime).inMilliseconds;
 
-      print("$elapsedSinceStarted\t${event.x}\t${event.y}\t${event.z}");
+      var accX = event.x.toStringAsFixed(16).replaceAll(".", ",");
+      var accY = event.y.toStringAsFixed(16).replaceAll(".", ",");
+      var accZ = event.z.toStringAsFixed(16).replaceAll(".", ",");
+
+      speed += double.parse(event.x.toStringAsFixed(8));
+      displacement += speed;
+
+      print("$elapsedSinceStarted\t$elapsedMilis\t$accX\t$accY\t$accZ\t$speed\t$displacement");
 
       setState(() {
-        _text = speed.toStringAsPrecision(5).toString();
+        _text =
+            "X" + "\n" + event.x.toStringAsFixed(8) + "\n" + speed.toStringAsPrecision(5).toString() + "\n" + displacement.toString();
         // _text = 'aaaa';
       });
     });
