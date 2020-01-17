@@ -27,25 +27,39 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int startTime;
+  double speed = 0;
+  bool isRunning = false;
+
+  String _text = '';
 
   void _incrementCounter() {
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      print(event);
-    });
-// [AccelerometerEvent (x: 0.0, y: 9.8, z: 0.0)]
+    if (isRunning) {
+      // If running, stop
+      isRunning = false;
+      startTime = null;
+    } else {
+      // If not running, start
+      isRunning = true;
+      startTime = DateTime.now().millisecondsSinceEpoch;
+    }
 
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      print(event);
-    });
-// [UserAccelerometerEvent (x: 0.0, y: 0.0, z: 0.0)]
+      if (!isRunning) {
+        return;
+      }
 
-    gyroscopeEvents.listen((GyroscopeEvent event) {
-      print(event);
-    });
-// [GyroscopeEvent (x: 0.0, y: 0.0, z: 0.0)]
+      // var curTime = DateTime.now().millisecondsSinceEpoch;
 
-    setState(() {
-      _counter++;
+      var elapsedSinceStarted = DateTime.now().toIso8601String();
+      speed += event.x;
+
+      print("$elapsedSinceStarted\t${event.x}\t${event.y}\t${event.z}");
+
+      setState(() {
+        _text = speed.toStringAsPrecision(5).toString();
+        // _text = 'aaaa';
+      });
     });
   }
 
@@ -63,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
               'You have pushed the button this many times:',
             ),
             Text(
-              '$_counter',
+              '$_text',
               style: Theme.of(context).textTheme.display1,
             ),
           ],
